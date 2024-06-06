@@ -8,8 +8,8 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/bhendo/go-powershell/backend"
-	"github.com/bhendo/go-powershell/utils"
+	"github.com/OnDefend/go-shell/backend"
+	"github.com/OnDefend/go-shell/utils"
 	"github.com/juju/errors"
 )
 
@@ -94,9 +94,10 @@ func streamReader(stream io.Reader, boundary string, buffer *string, signal *syn
 	output := ""
 	bufsize := 64
 	marker := boundary + newline
+	breakIndex := 0
 
+	buf := make([]byte, bufsize)
 	for {
-		buf := make([]byte, bufsize)
 		read, err := stream.Read(buf)
 		if err != nil {
 			return err
@@ -104,12 +105,14 @@ func streamReader(stream io.Reader, boundary string, buffer *string, signal *syn
 
 		output = output + string(buf[:read])
 
-		if strings.HasSuffix(output, marker) {
+		if strings.Contains(output, marker) {
+			breakIndex = strings.Index(output, marker)
 			break
 		}
+		buf = buf[:0]
 	}
 
-	*buffer = strings.TrimSuffix(output, marker)
+	*buffer = output[:breakIndex]
 	signal.Done()
 
 	return nil
