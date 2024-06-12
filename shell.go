@@ -107,8 +107,9 @@ func streamReader(stream io.Reader, boundary string, buffer *string, signal *syn
 
 	log.Printf("Boundary: %s\n", boundary)
 	log.Printf("Marker: %s\n", marker)
+	buf := make([]byte, bufsize)
 	for {
-		buf := make([]byte, bufsize)
+
 		read, err := stream.Read(buf)
 		if err != nil {
 			return err
@@ -116,7 +117,7 @@ func streamReader(stream io.Reader, boundary string, buffer *string, signal *syn
 
 		output = output + string(buf[:read])
 
-		if strings.HasSuffix(output, marker) {
+		if strings.HasSuffix(output, boundary) {
 			break
 		}
 		log.Printf("Current buffer: %s\n", buf)
