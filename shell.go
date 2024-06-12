@@ -111,6 +111,10 @@ func streamReader(stream io.Reader, boundary string, buffer *string, signal *syn
 	}
 
 	*buffer = strings.Replace(output, boundary, "", -1)
+	// if the final character is new line, remove it
+	if strings.HasSuffix(*buffer, newline) {
+		*buffer = (*buffer)[:len(*buffer)-len(newline)]
+	}
 	signal.Done()
 
 	return nil
