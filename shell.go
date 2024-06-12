@@ -105,6 +105,8 @@ func streamReader(stream io.Reader, boundary string, buffer *string, signal *syn
 	bufsize := 64
 	marker := boundary + newline
 
+	log.Printf("Boundary: %s\n", boundary)
+	log.Printf("Marker: %s\n", marker)
 	for {
 		buf := make([]byte, bufsize)
 		read, err := stream.Read(buf)
