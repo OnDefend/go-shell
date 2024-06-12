@@ -94,7 +94,6 @@ func streamReader(stream io.Reader, boundary string, buffer *string, signal *syn
 	// read all output until we have found our boundary token
 	output := ""
 	bufsize := 64
-	marker := boundary + newline
 
 	buf := make([]byte, bufsize)
 	for {
