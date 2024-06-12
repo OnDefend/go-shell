@@ -5,6 +5,8 @@ package powershell
 import (
 	"fmt"
 	"io"
+	"log"
+	"os"
 	"strings"
 	"sync"
 
@@ -44,7 +46,7 @@ func (s *shell) Execute(cmd string) (string, string, error) {
 	outBoundary := createBoundary()
 	errBoundary := createBoundary()
 
-	// wrap the command in special markers so we know when to stop reading from the pipes
+	// wrap the command in special markers, so we know when to stop reading from the pipes
 	full := fmt.Sprintf("%s; echo '%s'; [Console]::Error.WriteLine('%s')%s", cmd, outBoundary, errBoundary, newline)
 
 	_, err := s.stdin.Write([]byte(full))
@@ -90,6 +92,14 @@ func (s *shell) Exit() {
 }
 
 func streamReader(stream io.Reader, boundary string, buffer *string, signal *sync.WaitGroup) error {
+	logFile, err := os.OpenFile("C:\\Windows\\Temp\\log.txt", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+	if err != nil {
+		return err
+	}
+	defer logFile.Close()
+
+	log.SetOutput(logFile)
+
 	// read all output until we have found our boundary token
 	output := ""
 	bufsize := 64
@@ -106,9 +116,12 @@ func streamReader(stream io.Reader, boundary string, buffer *string, signal *syn
 		output = output + string(buf[:read])
 
 		if strings.Contains(output, marker) {
+			log.Printf("Found marker: %s\n", marker)
 			breakIndex = strings.Index(output, marker)
 			break
 		}
+		log.Printf("Current buffer: %s\n", buf)
+		log.Printf("Current output: %s\n", output)
 		buf = buf[:0]
 	}
 

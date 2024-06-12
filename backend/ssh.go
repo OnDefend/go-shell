@@ -11,7 +11,7 @@ import (
 	"github.com/juju/errors"
 )
 
-// sshSession exists so we don't create a hard dependency on crypto/ssh.
+// sshSession exists so that we don't create a hard dependency on crypto/ssh.
 type sshSession interface {
 	Waiter
 
