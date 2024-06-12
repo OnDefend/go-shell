@@ -117,11 +117,12 @@ func streamReader(stream io.Reader, boundary string, buffer *string, signal *syn
 
 		output = output + string(buf[:read])
 
-		if strings.HasSuffix(output, boundary) {
+		if strings.Contains(output, boundary) {
+			log.Println("Found boundary")
+			log.Printf("Full output: %s\n", output)
 			break
 		}
 		log.Printf("Current buffer: %s\n", buf)
-		log.Printf("Current output: %s\n", output)
 	}
 
 	*buffer = strings.TrimSuffix(output, marker)
