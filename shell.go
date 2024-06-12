@@ -5,8 +5,6 @@ package powershell
 import (
 	"fmt"
 	"io"
-	"log"
-	"os"
 	"strings"
 	"sync"
 
@@ -92,21 +90,12 @@ func (s *shell) Exit() {
 }
 
 func streamReader(stream io.Reader, boundary string, buffer *string, signal *sync.WaitGroup) error {
-	logFile, err := os.OpenFile("stream.log", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
-	if err != nil {
-		return err
-	}
-	defer logFile.Close()
-
-	log.SetOutput(logFile)
 
 	// read all output until we have found our boundary token
 	output := ""
 	bufsize := 64
 	marker := boundary + newline
 
-	log.Printf("Boundary: %s\n", boundary)
-	log.Printf("Marker: %s\n", marker)
 	buf := make([]byte, bufsize)
 	for {
 
@@ -118,14 +107,11 @@ func streamReader(stream io.Reader, boundary string, buffer *string, signal *syn
 		output = output + string(buf[:read])
 
 		if strings.Contains(output, boundary) {
-			log.Println("Found boundary")
-			log.Printf("Full output: %s\n", output)
 			break
 		}
-		log.Printf("Current buffer: %s\n", buf)
 	}
 
-	*buffer = strings.TrimSuffix(output, marker)
+	*buffer = strings.Replace(output, boundary, "", -1)
 	signal.Done()
 
 	return nil
